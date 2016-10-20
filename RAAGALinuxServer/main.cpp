@@ -78,7 +78,7 @@ int main(int argc, char ** argv)
 	init_socket();	
 
 
-	char recvBuffer[960];
+	char recvBuffer[4800];
 	while(1)
 	{
 		if((cli = accept(sock, (struct sockaddr *) & client, &len)) == -1)
@@ -92,7 +92,7 @@ int main(int argc, char ** argv)
 			recv(cli, recvBuffer, sizeof(recvBuffer), 0);
 			write_pcm((u_char *)recvBuffer, period_size_frames);
 //			int i = 0;
-//			for ( i = 0; i < 960; i++)
+//			for ( i = 0; i < 4800; i++)
 //			{
 //				printf("%c",recvBuffer[i]);
 //			}
@@ -359,9 +359,9 @@ void setup_hw_params(void)
 		fprintf(stderr, "Error retrieving maximum buffer time");
 		exit (1);
 	}
-	if(buffer_time > 10000)
+	if(buffer_time > 50000)
 	{
-		buffer_time = 10000;
+		buffer_time = 50000;
 	}
 	period_time = buffer_time / 4;
 	err = snd_pcm_hw_params_set_period_time_near(pcm_handle, hwparams, &period_time, 0);
@@ -418,7 +418,7 @@ void setup_sw_params(void)
 	}
 
 	// start threshold
-	err = snd_pcm_sw_params_set_start_threshold(pcm_handle, swparams, period_size_frames);
+	err = snd_pcm_sw_params_set_start_threshold(pcm_handle, swparams, buffer_size_frames);
 	if(err < 0)
 	{
 		fprintf(stderr, "Error setting start threshold");
@@ -426,7 +426,7 @@ void setup_sw_params(void)
 	}
 
 	// Stop threshold
-	err = snd_pcm_sw_params_set_stop_threshold(pcm_handle, swparams, period_size_frames);
+	err = snd_pcm_sw_params_set_stop_threshold(pcm_handle, swparams, buffer_size_frames);
 	if(err <0)
 	{
 		fprintf(stderr, "Error setting stop threshold");
@@ -446,11 +446,11 @@ void setup_sw_params(void)
 		fprintf(stderr, "Error installing software parameters");
 		exit(1);
 	}
-	//snd_output_t * log;
-	//snd_output_stdio_attach(&log, stderr, 0);
-	//snd_pcm_sw_params_dump(swparams,log);
-	//snd_pcm_dump(pcm_handle,log);
-	//snd_output_close(log);
+	snd_output_t * log;
+	snd_output_stdio_attach(&log, stderr, 0);
+	snd_pcm_sw_params_dump(swparams,log);
+	snd_pcm_dump(pcm_handle,log);
+	snd_output_close(log);
 }
 
 void play_wave_file(void)
@@ -542,6 +542,7 @@ ssize_t  write_pcm(u_char * data, size_t count)
 		count = period_size_frames;
 	}
 	while (count > 0) {
+		//snd_pcm_start(pcm_handle);
 		r = snd_pcm_writei(pcm_handle, data, count);
 		//fprintf(stderr, "Count: %i\n", count);
 		int i;
@@ -555,6 +556,14 @@ ssize_t  write_pcm(u_char * data, size_t count)
 			//xrun();
 			printf("xrun occured\n");
 			snd_pcm_drain(pcm_handle);
+			snd_pcm_prepare(pcm_handle);
+			//snd_pcm_start(pcm_handle);
+			//snd_pcm_reset(pcm_handle);
+			//snd_pcm_drop(pcm_handle);
+			//open_pcm();
+			//setup_hw_params();
+			//setup_sw_params();
+			//snd_pcm_drop(pcm_handle);
 		} else if (r == -ESTRPIPE) {
 			//suspend();
 		} else if (r < 0) {

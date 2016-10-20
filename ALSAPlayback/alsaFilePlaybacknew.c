@@ -289,9 +289,9 @@ void setup_hw_params(void)
 		fprintf(stderr, "Error retrieving maximum buffer time");
 		exit (1);
 	}
-	if(buffer_time > 10000)
+	if(buffer_time > 50000)
 	{
-		buffer_time = 10000;
+		buffer_time = 50000;
 	}
 	period_time = buffer_time / 4;
 	err = snd_pcm_hw_params_set_period_time_near(pcm_handle, hwparams, &period_time, 0);
@@ -376,11 +376,11 @@ void setup_sw_params(void)
 		fprintf(stderr, "Error installing software parameters");
 		exit(1);
 	}
-	//snd_output_t * log;
-	//snd_output_stdio_attach(&log, stderr, 0);
-	//snd_pcm_sw_params_dump(swparams,log);
-	//snd_pcm_dump(pcm_handle,log);
-	//snd_output_close(log);
+	snd_output_t * log;
+	snd_output_stdio_attach(&log, stderr, 0);
+	snd_pcm_sw_params_dump(swparams,log);
+	snd_pcm_dump(pcm_handle,log);
+	snd_output_close(log);
 }
 
 void play_wave_file(void)
@@ -394,7 +394,7 @@ void play_wave_file(void)
 	while(written < total_frames)
 	{
 		//snd_pcm_wait(pcm_handle,100);
-		result = write_pcm(audio_buffer + (written* frame_size), period_size_frames );
+		result = write_pcm(audio_buffer + (written* frame_size), buffer_size_frames );
 		//fprintf(stderr , "result : %i\n", result);
 		written += result;
 	}
@@ -484,6 +484,7 @@ ssize_t  write_pcm(u_char * data, size_t count)
 		} else if (r == -EPIPE) {
 			//xrun();
 			printf("xrun occured");
+			snd_pcm_drain(pcm_handle);
 		} else if (r == -ESTRPIPE) {
 			//suspend();
 		} else if (r < 0) {
