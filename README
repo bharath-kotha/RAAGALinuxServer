@@ -1,0 +1,17 @@
+*****************************
+**********  RAAGA  **********
+*****************************
+
+This project is aimed at streaming audio from one device to other through Wi-Fi
+
+In the present commit, server is running on linux and client on windows
+Server receives data from client and plays through speakers using ALSA API
+Following parameters are hard coded and should be changed in the following devs
+* ALSA period_size
+* number of channels
+* sample rate of audio data
+* file format
+* bits per sample
+* sample format
+
+Windows client collects data from audio buffer using WASAPI and sends it to client
