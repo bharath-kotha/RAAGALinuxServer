@@ -1,3 +1,14 @@
+/*
+*
+* Team Id: <Team Id>
+* Author List: Bharath, Diptesh, Vinod
+* Filename: main.c
+* Theme: Realtime Wireless Music Streaming
+* Functions: init_socket, read_wave_file, setup_hw_params, open_pcm, play_wave_file, write_pcm
+* Global Variables: <List of global variables defined in this file, None if no global
+* variables>
+*
+*/
 /*********************
 include files
 *********************/
@@ -58,7 +69,15 @@ void play_wave_file(void);
 // A helper function for play_wave_file to write data to PCM devie
 ssize_t  write_pcm(u_char * data, size_t count);
 
-
+/*
+* Function Name: main
+* Input: file name
+* Output: int to inform the caller that the program exited correctly or
+* incorrectly (C code standard)
+* Logic: Play the wave file given as input (just for initalization) and send it to socket
+* Example Call: Called automatically by the Operating System
+*
+*/
 
 int main(int argc, char ** argv)
 {
@@ -104,7 +123,15 @@ int main(int argc, char ** argv)
 
 return 0;
 }
-
+/*
+*
+* Function Name: init_socket()
+* Input: <none>
+* Output: <none;>
+* Logic: Initialize Socket.
+* Example Call: init_socket();
+*
+*/
 void init_socket(void)
 {
 
@@ -138,7 +165,16 @@ void init_socket(void)
 		exit(1);
 	}
 }
-
+/*
+*
+* Function Name: open_pcm()
+* Input: <none>
+* Output: <none; opens a PCM stream to device>
+* Logic: Invokes a PCM Stream, and creates a PCM handle. 
+* 		 Displays error, if it cannot be opened.
+* Example Call: open_pcm();
+*
+*/
 void open_pcm(void)
 {
 	snd_pcm_info_t * info;
@@ -158,7 +194,16 @@ void open_pcm(void)
 	}
 }
 
-
+/*
+*
+* Function Name: read_wave_file()
+* Input: <A File Handle, refer to the filename "rb" in the default directory at present>
+* Output: <none, reads the WAV file, and calculates the frame size>
+* Logic: It reads the WAV file, figures out the number of channels, 
+* 		 bit rate, bytes per sample, etc. and calculates the frame size.
+* Example Call: read_wave_file(fHandle);
+*
+*/
 void read_wave_file(FILE * handle)
 {
 	char c[4];
@@ -303,7 +348,14 @@ void read_wave_file(FILE * handle)
 	frame_size = numChannels * bitsPerSample / 8;
 	total_frames = dataSize / frame_size;
 }
-
+/*
+*
+* Function Name: setup_hw_params()
+* Input: <none>
+* Output: <none>
+* Logic: Sets up the hardware parameters for playing WAV file using the PCM stream opened.
+* Example Call: setup_hw_params()
+*/
 
 void setup_hw_params(void)
 {
@@ -401,7 +453,15 @@ void setup_hw_params(void)
 	//snd_pcm_dump(pcm_handle,log);
 	//snd_output_close(log);
 }
-
+/*
+*
+* Function Name: setup_sw_params
+* Input: <none>
+* Output: <none>
+* Logic: Sets up the software parametrs like period size frames, calculated from setup_hw_params.
+* Example Call: setup_sw_params()
+*
+*/
 void setup_sw_params(void)
 {
 	snd_pcm_sw_params_t * swparams;
@@ -453,6 +513,13 @@ void setup_sw_params(void)
 	snd_output_close(log);
 }
 
+/*
+* Function Name: play_wav_file
+* Input: <none>
+* Output: <none>
+* Logic: Sends the WAV file data to PCM device.
+* Example Call: play_wav_file()
+*/
 void play_wave_file(void)
 {
 	
@@ -531,7 +598,15 @@ void play_wave_file(void)
 }
 
 
-
+/*
+*
+* Function Name: write_pcm
+* Input: <audio buffer, counter value>
+* Output: <resultant frame size>
+* Logic: Writes to the PCM device, helper function.
+* Example Call: write_pcm(audio_buffer+ written, l);
+*
+*/
 ssize_t  write_pcm(u_char * data, size_t count)
 {
 	ssize_t r;
